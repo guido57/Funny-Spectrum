@@ -13,4 +13,6 @@ I added:
 
 2) a button to go to the next radio station 
 
+### Schematics
+
 
