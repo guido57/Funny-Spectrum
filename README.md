@@ -13,4 +13,7 @@ I added:
 
 2) a button to go to the next radio station 
 
+### Schematics
 
+
+[![](https://github.com/guido57/InternetRadioI2S-PCM5102/blob/master/schematics/InternetRadioPCM5102-I2S-Schematic.png)](https://github.com/guido57/InternetRadioI2S-PCM5102/blob/master/schematics/InternetRadioPCM5102-I2S-Schematic.png)
