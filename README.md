@@ -13,7 +13,17 @@ I added:
 
 2) a button to go to the next radio station 
 
-### Schematics
+3) two WS2812 12 LEDs rings to display the audio spectrum 
 
+### Issues
+- It's always on
+- a) "FFT calculations"  b) "http receiving" c) "MP3/AAC decoding" run concurrently on core 1. Therefore LEDs refreshing rate must be limited at 226 msecs (10000/44100) to avoid audio clicks 
+
+### TODO 
+- Add a clock to turn off and on at specific time
+- Move FFT calculations on core 0 
+
+
+### Schematics
 
 [![](https://github.com/guido57/InternetRadioI2S-PCM5102/blob/master/schematics/InternetRadioPCM5102-I2S-Schematic.png)](https://github.com/guido57/InternetRadioI2S-PCM5102/blob/master/schematics/InternetRadioPCM5102-I2S-Schematic.png)
