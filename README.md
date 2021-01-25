@@ -1,6 +1,10 @@
 # Funny Spectrum (audio spectrum viewed by colors)
 
-This is an Internet Radio receiver based on ESP32 (D1 Mini) and PCM5102 I2S board.
+This is an Internet Radio receiver based on ESP32 (D1 Mini),  PCM5102 I2S DAC and WS2812 to display the audio spectrum by colors.
+
+### Show
+
+[![](https://github.com/guido57/InternetRadioI2S-PCM5102/blob/master/schematics/InternetRadioPCM5102-I2S-Schematic.png)](https://github.com/guido57/InternetRadioI2S-PCM5102/blob/master/schematics/InternetRadioPCM5102-I2S-Schematic.png)
 
 ### Overview
 It is mostly forked from https://github.com/schreibfaul1/ESP32-audioI2S.
