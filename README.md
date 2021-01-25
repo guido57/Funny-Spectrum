@@ -28,6 +28,7 @@ It is mostly forked from https://github.com/schreibfaul1/ESP32-audioI2S but I ad
 
 ## Web page at the /wifi url to set / change the WIFI hotspot
 If no Internet is available, the device becomes an access point, which you can connect to by smartphone or PC and access this page at http://192.168.4.1
+
 [![Watch](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Internet%20settings.PNG)](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Internet%20settings.PNG)
 
 
