@@ -4,7 +4,11 @@ This is an Internet Radio receiver based on ESP32 (D1 Mini),  PCM5102 I2S DAC an
 
 ### Show
 
-[![](https://github.com/guido57/InternetRadioI2S-PCM5102/blob/master/schematics/InternetRadioPCM5102-I2S-Schematic.png)](https://github.com/guido57/InternetRadioI2S-PCM5102/blob/master/schematics/InternetRadioPCM5102-I2S-Schematic.png)
+[![](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Internet%20Radio%20ESP32%20I2S%20PCM5102%20WS2812.PNG)](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Internet%20Radio%20ESP32%20I2S%20PCM5102%20WS2812.PNG)
+
+
+[![See the video, also.](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Internet%20Radio%20ESP32%20I2S%20PCM5102%20WS2812.PNG)](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Internet%20Radio%20ESP32%20I2S%20PCM5102%20WS2812.PNG)
+
 
 ### Overview
 It is mostly forked from https://github.com/schreibfaul1/ESP32-audioI2S.
