@@ -36,4 +36,4 @@ I added:
 
 ### Schematics
 
-[![](https://github.com/guido57/InternetRadioI2S-PCM5102/blob/master/schematics/InternetRadioPCM5102-I2S-Schematic.png)](https://github.com/guido57/InternetRadioI2S-PCM5102/blob/master/schematics/InternetRadioPCM5102-I2S-Schematic.png)
+[![Watch](https://github.com/guido57/InternetRadioI2S-PCM5102/blob/master/schematics/InternetRadioPCM5102-I2S-Schematic.png)](https://github.com/guido57/InternetRadioI2S-PCM5102/blob/master/schematics/InternetRadioPCM5102-I2S-Schematic.png)
