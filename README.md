@@ -1,4 +1,4 @@
-# InternetRadioI2S-PCM5102
+# Funny Spectrum (audio spectrum viewed by colors)
 
 This is an Internet Radio receiver based on ESP32 (D1 Mini) and PCM5102 I2S board.
 
