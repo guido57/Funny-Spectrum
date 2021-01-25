@@ -10,7 +10,7 @@ See the video, also.
 
 [![Watch the video](https://youtu.be/EDWJl283ymY)](https://youtu.be/EDWJl283ymY)
 
-[![Watch the video](https://i.imgur.com/vKb2F1B.png)](https://youtu.be/vt5fpE0bzSY)
+[![Watch the video](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Internet%20Radio%20ESP32%20I2S%20PCM5102%20WS2812.PNG)](https://youtu.be/vt5fpE0bzSY)
 
 ### Overview
 It is mostly forked from https://github.com/schreibfaul1/ESP32-audioI2S.
