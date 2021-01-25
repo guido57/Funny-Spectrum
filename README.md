@@ -23,9 +23,11 @@ It is mostly forked from https://github.com/schreibfaul1/ESP32-audioI2S but I ad
 
 ### Very basic web pages
 
-
+## Web page at the root of the web server (i.e. the ip address got by ESP32), to set / change up to five internet radios and set the volume
 [![Watch](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Choose%20your%20Internet%20Radio.PNG)](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Choose%20your%20Internet%20Radio.PNG)
 
+## Web page at the /wifi url to set / change the WIFI hotspot
+If no Internet is available, the device becomes an access point, which you can connect to by smartphone or PC and access this page at http://192.168.4.1
 [![Watch](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Internet%20settings.PNG)](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Internet%20settings.PNG)
 
 
