@@ -10,6 +10,12 @@ String softAP_password  = APPSK;
 /* hostname for mDNS. Should work at least on windows. Try http://esp32.local */
 const char *myHostname = "esp32";
 
+// NTP settings
+const char* ntpServer = "pool.ntp.org";
+const long  gmtOffset_sec = 3600; // GMT + 1
+//Change the Daylight offset in milliseconds. If your country observes Daylight saving time set it to 3600. Otherwise, set it to 0.
+const int   daylightOffset_sec = 3600;
+
 /* Don't set these wifi credentials. They are configurated at runtime and stored on EEPROM */
 String ssid;
 String password;
@@ -17,6 +23,10 @@ String password;
 String stations[5];
 int volume = 10;
 int station = 0;
+
+// On and Off Hours and Minutes
+String hh_on = "00", mm_on="00", hh_off="00", mm_off="00";
+bool audio_light_on = false;
 
 // DNS server
 const byte DNS_PORT = 53;
@@ -60,6 +70,17 @@ void connectWifi() {
     Serial.print("connRes: ");
     Serial.println(connRes);
   }
+}
+
+
+void printLocalTime()
+{
+  struct tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+    return;
+  }
+  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
 }
 
 // =====================================================
@@ -123,6 +144,10 @@ void WiFi_loop(void){
       _PP("IP address");
       Serial.println(WiFi.localIP());
 
+      //init and get the time
+      configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+      printLocalTime();
+
       // Setup MDNS responder
       /*
           if (!MDNS.begin(myHostname)) {
@@ -137,7 +162,7 @@ void WiFi_loop(void){
       WiFi.mode(WIFI_MODE_STA);
 
       // start the radio
-      audio.connecttohost(stations[station]);
+      audio.connecttohost(stations[station].c_str());
       audio.setVolume(volume);
     }
     else if (s == WL_NO_SSID_AVAIL){
@@ -161,7 +186,34 @@ void WiFi_loop(void){
   dnsServer.processNextRequest();
   //HTTP
   web_server.handleClient();
-  
+
+  tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+  }else{
+    // check if we ar ON or OFF
+    uint16_t mmm_on = hh_on.toInt() * 60 + mm_on.toInt();
+    uint16_t mmm_off = hh_off.toInt() * 60 + mm_off.toInt();
+    int16_t now_t = timeinfo.tm_hour * 60 + timeinfo.tm_min;
+    //Serial.printf("now_t=%d mmm_on=%d mmm_off=%d\r\n",now_t,mmm_on,mmm_off);
+    if(     (mmm_on < mmm_off &&  now_t >= mmm_on && now_t < mmm_off) 
+         || (mmm_on > mmm_off && (now_t >= mmm_on || now_t < mmm_off)) 
+      ){
+      if(audio_light_on == false){
+        Serial.println("Turn on radio and lights");
+        if(!audio.isRunning())
+          audio.pauseResume();
+        audio.connecttohost(stations[station].c_str());  
+        audio_light_on = true;  
+      }      
+    }else{
+      if(audio_light_on)  
+        Serial.println("Turn off radio and lights");
+      if(audio.isRunning())
+        audio.pauseResume();
+      audio_light_on = false;  
+    }
+  }
 }
 // =====================================================
 // tosk run by Taskscheduler to handle WIFI  
@@ -197,6 +249,16 @@ void loadCredentials() {
   len += sizeof(volume);
   station = EEPROM.readInt(len); // load selected station index 
   len += sizeof(station);
+
+  hh_on = EEPROM.readString(len); // load hh_on
+  len += hh_on.length() + 1;
+  mm_on = EEPROM.readString(len); // load mm_on
+  len += mm_on.length() + 1;
+  hh_off = EEPROM.readString(len); // load hh_off
+  len += hh_off.length() + 1;
+  mm_off = EEPROM.readString(len); // load mm_off
+  len += mm_off.length() + 1;
+
   String ok = EEPROM.readString(len); // load ok. ok means that stored data are valid
   //printf("got ok=%s\r\n",ok.c_str());
   
@@ -211,6 +273,10 @@ void loadCredentials() {
     stations[0] = "http://uk5.internet-radio.com:8347/";
     for(int i = 1;i<5;i++)
       stations[i] = "";
+    hh_on = "00";
+    hh_off = "00";
+    mm_on = "00";
+    mm_off = "00";
   }
   
   Serial.println("Recovered settings:");
@@ -220,20 +286,26 @@ void loadCredentials() {
     Serial.printf("stations[%d]=%s\r\n",i,stations[i].c_str()) ;
   Serial.printf("Selected station = %d\r\n",station);   
   Serial.printf("Volume = %d\r\n", volume);   
+  Serial.printf("hh_on = %s\r\n", hh_on.c_str());   
+  Serial.printf("mm_on = %s\r\n", mm_on.c_str());   
+  Serial.printf("hh_off = %s\r\n", hh_off.c_str());   
+  Serial.printf("mm_off = %s\r\n", mm_off.c_str());   
 }
 
 /** Store WLAN credentials to EEPROM */
 void saveCredentials() {
 
   Serial.println("Saving settings ...");
-  /*
+  
   Serial.printf("ssid=%s\r\n",ssid.c_str());
   Serial.printf("password=%s\r\n",password.c_str());
   for(int i=0;i<5;i++)
     Serial.printf("stations[%d]=%s\r\n",i,stations[i].c_str()) ;
   Serial.printf("Selected station = %d\r\n",station);   
   Serial.printf("Volume = %d\r\n", volume); 
-  */
+  Serial.printf("ON %s:%s\r\n", hh_on.c_str(),mm_on.c_str()); 
+  Serial.printf("OFF %s:%s\r\n", hh_off.c_str(),mm_off.c_str()); 
+  
   EEPROM.begin(2048);
   size_t len = 0;
   len += EEPROM.writeString(len, ssid) + 1;
@@ -243,6 +315,10 @@ void saveCredentials() {
   }
   len += EEPROM.writeInt(len, volume);
   len += EEPROM.writeInt(len, station);
+  len += EEPROM.writeString(len, hh_on) + 1;
+  len += EEPROM.writeString(len, mm_on) + 1;
+  len += EEPROM.writeString(len, hh_off) + 1;
+  len += EEPROM.writeString(len, mm_off) + 1;
   EEPROM.writeString(len,"OK"); 
   EEPROM.commit();
   EEPROM.end();

@@ -1,6 +1,5 @@
 /** Handle root or redirect to captive portal */
 #include <arduino.h>
-
 #include <handleHttp.h>
 #include <main.h>
 #include <tools.h>
@@ -37,7 +36,38 @@ void handleRoot() {
     Page += S("<input type='radio' ") + (station == i ? S(" checked = true ") : S("")) + S(" name='station' value='") + S(i) + S("'><input name='station") + S(i) +  S("' size=100 value='") + stations[i] + S("'><br>");
   }
 
-  Page += S("<input type='range' min='0' max='21'  style='width:400px' name='volume' value='") + S(volume) + S("' >");
+  Page += S("Volume: <input type='range' min='0' max='21'  style='width:400px' name='volume' value='") + S(volume) + S("' ><br>");
+  
+  Page += F("ON HH:MM <select name='hh_on' id='hh_on'>");
+  for(int hh = 0; hh<24;hh++){
+    String hhs = (hh < 10 ? "0" : "") + String(hh);
+    Page += S("<option value='" + hhs + "' " + (hhs == hh_on ? "selected" : "") +  + ">" + hhs + "</option>");
+  }
+  Page += F("</select>"
+            " : <select name='mm_on' id='mm_on'>"
+          );
+  for(int mm = 0; mm<60;mm+=15){
+    String mms = (mm < 15 ? "0" : "") + String(mm);
+    Page += S("<option value='" + mms + "' " + (mms == mm_on ? "selected" : "") +  + ">" + mms + "</option>");
+  }
+  Page += F("</select><br>");
+          
+  Page += F("OFF HH:MM <select name='hh_off' id='hh_off'>");
+  for(int hh = 0; hh<24;hh++){
+    String hhs = (hh < 10 ? "0" : "") + String(hh);
+    Page += S("<option value='" + hhs + "' " + (hhs == hh_off ? "selected" : "") +  + ">" + hhs + "</option>");
+  }
+  Page += F("</select>"
+            " : <select name='mm_off' id='mm_off'>"
+          );
+  for(int mm = 0; mm<60;mm+=15){
+    String mms = (mm < 15 ? "0" : "") + String(mm);
+    Page += S("<option value='" + mms + "' " + (mms == mm_off ? "selected" : "") +  + ">" + mms + "</option>");
+  }
+  Page += F("</select>"
+            " "
+          );
+
   Page += F(
             "<br /><input type='submit' value='Save'/>"
             "</form>"
@@ -159,12 +189,19 @@ void handleSettingsSave() {
   station = web_server.arg("station").toInt();
   volume = web_server.arg("volume").toInt();
   
+  hh_on = web_server.arg("hh_on");
+  mm_on = web_server.arg("mm_on");
+  hh_off = web_server.arg("hh_off");
+  mm_off = web_server.arg("mm_off");
+
   for(int i=0;i<5;i++){
     Serial.printf("Station[%d]=%s\r\n",i,stations[i].c_str());
   }
   Serial.printf("station=%d\r\n",station);  
   Serial.printf("volume=%d\r\n",volume);  
-  
+  Serial.printf("ON=%s:%s\r\n",hh_on.c_str(),mm_on.c_str());  
+  Serial.printf("OFF=%s:%s\r\n",hh_off.c_str(),mm_off.c_str());  
+
   web_server.sendHeader("Location", "/", true);
   web_server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   web_server.sendHeader("Pragma", "no-cache");
@@ -173,7 +210,7 @@ void handleSettingsSave() {
   web_server.client().stop(); // Stop is needed because we sent no content length
   saveCredentials();
   if(last_station != station)
-    audio.connecttohost(stations[station]);
+    audio.connecttohost(stations[station].c_str());
   audio.setVolume(volume);
 }
 // ==================================================================================================
