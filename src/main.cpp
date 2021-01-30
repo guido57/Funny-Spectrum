@@ -22,39 +22,6 @@ int WS2812LeftRing_pin = 33;
 int WS2812RightRing_pin = 14;
 Adafruit_NeoPixel * strips[2];
 
-// ----------------------------------------------------------------------------
-// read 12 double values from bands and light 12 LEDs of strip
-// ----------------------------------------------------------------------------
-void showbands(Adafruit_NeoPixel * strip, double bands[12]){
-
-  //Serial.println("Computed bands:");
-  double max = 0;
-  //double avg = 0;
-  
-  // evaluate bands  
-  for(int j=0; j<num_bands;j++){
-      if(bands[j] > max) max = bands[j];
-  }
-  // set LEDs according to bands
-  for(int j=0; j<num_bands;j++){
-    bands[j] = bands[j] / 4000;
-    if(bands[j]>255) bands[j] = 255;      
-    bands[j] = (bands[j]*bands[j])/(255.0);
-  }
-  strip->setPixelColor(0, strip->Color(bands[0],0,0));                                     // RED
-  strip->setPixelColor(1, strip->Color(bands[1]*3/4,bands[1]*1/4,                0)); //ORANGE        
-  strip->setPixelColor(2, strip->Color(bands[2]*2/4,bands[2]*2/4,                0));         
-  strip->setPixelColor(3, strip->Color(bands[3]*1/4,bands[3]*3/4,                0));         
-  strip->setPixelColor(4, strip->Color(                0,bands[4]    ,                0)); //GREEN        
-  strip->setPixelColor(5, strip->Color(                0,bands[5]*3/4,bands[5]*1/4));         
-  strip->setPixelColor(6, strip->Color(                0,bands[6]*2/4,bands[5]*2/4));         
-  strip->setPixelColor(7, strip->Color(                0,bands[7]*1/4,bands[7]*3/4));         
-  strip->setPixelColor(8, strip->Color(                0,                0,bands[8]    )); // BLUE         
-  strip->setPixelColor(9, strip->Color(bands[9]*1/4,                0,bands[9]*3/4));         
-  strip->setPixelColor(10, strip->Color(bands[10]*2/4,               0,bands[10]*2/4));         
-  strip->setPixelColor(11, strip->Color(bands[11]*3/4,                0,bands[11]*1/4));         
-  strip->show();
-}
 
 // -------------------------------------------------------------------------------------------------
 // receive a stereo sample and use it to light the LEDs
@@ -63,6 +30,10 @@ void showbands(Adafruit_NeoPixel * strip, double bands[12]){
 unsigned long count_samples = 0;
 void playSampleCallback(int16_t sample[2]){
   
+  // yes, you can also modify the samples going out!
+  sample[0] = sample[0] / 4;
+  sample[1] = sample[1] / 4;
+
   uint16_t ndx = count_samples % 2048;
   // read 1024 samples, decimating by 2 (i.e. sampling at 22050 Hz)
   if(ndx%2 == 0){
@@ -75,9 +46,9 @@ void playSampleCallback(int16_t sample[2]){
       myFFT(real_fft_plan_left, benchmark_mags_left);
       myFFT(real_fft_plan_right, benchmark_mags_right);
       Compute12bands(benchmark_mags_left, samples/2,bands);
-      showbands(strips[0],bands);
+      showbands(strips[0],bands,num_bands);
       Compute12bands(benchmark_mags_right, samples/2,bands);
-      showbands(strips[1],bands);
+      showbands(strips[1],bands,num_bands);
       //Serial.printf("FFT on 1024 samples and light LEDs took %lu msecs\r\n",millis()-start_millis);
     }
   }

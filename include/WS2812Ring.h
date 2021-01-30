@@ -23,6 +23,9 @@ class TaskWS2812Ring : public Task {
     //};
 };
 */
+
+void showbands(Adafruit_NeoPixel * strip, double bands[], int num_bands);
+
 void WS2812Ring_loop();
 
 // Fill the dots one after the other with a color

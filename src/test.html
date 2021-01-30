@@ -1,0 +1,36 @@
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width">
+    <title>Choose your Internet Radio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+</head>
+<body>
+    <h1>Choose your Internet Radio!</h1>
+    <p>You are connected through the wifi network: TIM-18373419</p>
+    <form class="w3-container form-inline" method="POST" action="settingssave">
+        
+        <label class="radio-inline">
+            <input type="radio" name="station" value="0">
+            <input name="station0" size="100" value="http://uk5.internet-radio.com:8347/">
+        </label><br/>
+        <label class="radio-inline">
+            <input type="radio" name="station" value="1">
+        </label>
+        <input name="station1" class="w3-input" size="100" value="http://hirschmilch.de:7000/chillout.aac"><br>
+        
+            <label class="radio-inline">
+            <input type="radio"  name="station" value="2">
+            <input name="station2" size="100" value="http://uk2.internet-radio.com:31491">
+            <br><input type="radio" checked="true" name="station" value="3">
+            <input name="station3" size="100" value="http://nl1.streamhosting.ch:80">
+            <br><input type="radio" name="station" value="4"><input name="station4" size="100" value="http://95.217.39.141:9125/stream"><br>Volume: <input type="range" min="0" max="21" style="width:400px" name="volume" value="1"><br>
+</label>   
+       
+    ON HH:MM <input type="time" name="hh_mm_on" id="hh__mm_on"><br/>
+    OFF HH:MM <input type="time" name="hh_mm_on" id="hh__mm_on"><br>
+    <input type="submit" value="Save">
+     </form>
+    <p>You may want to <a href="/wifi">config the wifi connection</a>.</p>
+</body>
+</html>
