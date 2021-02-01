@@ -3,7 +3,7 @@
 #include "Audio.h"
 #include "captive_portal.h"
 #include "mytask.h"
-#include "WS2812Ring.h"
+#include <WS2812Ring.h>
 #include "myfft.h"
 
 // Digital I/O used for MAX98357
@@ -22,6 +22,7 @@ int WS2812LeftRing_pin = 33;
 int WS2812RightRing_pin = 14;
 Adafruit_NeoPixel * strips[2];
 
+extern bool audio_light_on; // if Audio is paused it goes false
 
 // -------------------------------------------------------------------------------------------------
 // receive a stereo sample and use it to light the LEDs
@@ -30,36 +31,37 @@ Adafruit_NeoPixel * strips[2];
 unsigned long count_samples = 0;
 void playSampleCallback(int16_t sample[2]){
   
-  // yes, you can also modify the samples going out!
-  sample[0] = sample[0] / 4;
-  sample[1] = sample[1] / 4;
-
   uint16_t ndx = count_samples % 2048;
   // read 1024 samples, decimating by 2 (i.e. sampling at 22050 Hz)
   if(ndx%2 == 0){
+    //Serial.printf("sample[0]=%d sample[1]=%d\r\n", sample[0], sample[1]);
     real_fft_plan_left->input[ndx>>1] = sample[0];  // left channel
     real_fft_plan_right->input[ndx>>1] = sample[1]; // right channel
 
     if(ndx == 2046){
-      // now vReal contains 1024 samples -> it's time to compute the FFT
+      // now input contains 1024 samples -> it's time to compute the FFT
       //unsigned long start_millis = millis();
       myFFT(real_fft_plan_left, benchmark_mags_left);
       myFFT(real_fft_plan_right, benchmark_mags_right);
       Compute12bands(benchmark_mags_left, samples/2,bands);
-      showbands(strips[0],bands,num_bands);
+      //Serial.printf("bands[0]=%f benchmark_mags_left[100]=%f\r\n",bands[0],benchmark_mags_left[100]);
+      double scale = 16384.0 * 512.0 * 8.0;
+      showbands(strips[0],bands,num_bands,brightness/scale);
       Compute12bands(benchmark_mags_right, samples/2,bands);
-      showbands(strips[1],bands,num_bands);
+      showbands(strips[1],bands,num_bands,brightness/scale);
       //Serial.printf("FFT on 1024 samples and light LEDs took %lu msecs\r\n",millis()-start_millis);
     }
   }
   //Serial.printf("sample #%lu at millis=%lu \r\n",count_samples, millis());
   count_samples++;
-}
 
+  // yes, you can also modify the samples going out! In this case, lower the volume!
+  sample[0] = sample[0] / 4;
+  sample[1] = sample[1] / 4;
+}
 // =====================================================
 //  AUDIO SECTION
 Audio audio;
-
 // ---------------------------------------------
 // tosk run by Taskscheduler to handle Audio
 // ---------------------------------------------
@@ -143,6 +145,15 @@ void button_loop(){
     }
     last_gpio32 = gpio32;
   }
+  
+  if(audio_light_on == false) {
+    for(int i=0; i<12;i++){
+      strips[0]->setPixelColor(i, strips[0]->Color(0,0,0)); 
+      strips[1]->setPixelColor(i, strips[1]->Color(0,0,0)); 
+    }
+    strips[0]->show();
+    strips[1]->show();
+  }
 }
 
 class  MyTaskButton:MyTask{
@@ -173,15 +184,15 @@ void setup() {
     strips[0]->show(); // Initialize all pixels to 'off'
     strips[1]->show(); // Initialize all pixels to 'off'
 
-  CaptivePortalSetup(); 
-  _PL("TaskScheduler Audio Task");
-  myTaskAudio = new TaskAudio(10,&myScheduler);
+    CaptivePortalSetup(); 
+    _PL("TaskScheduler Audio Task");
+    myTaskAudio = new TaskAudio(10,&myScheduler);
 
-  pinMode(32, INPUT_PULLUP); // the button will short to ground
-  myTaskButton = new MyTaskButton(20,&myScheduler,button_loop); 
+    pinMode(32, INPUT_PULLUP); // the button will short to ground
+    myTaskButton = new MyTaskButton(20,&myScheduler,button_loop); 
 
-  real_fft_plan_left = fft_init((int)samples, FFT_REAL,(fft_direction_t) FFT_FORWARD, NULL, NULL);
-  real_fft_plan_right = fft_init((int)samples, FFT_REAL,(fft_direction_t) FFT_FORWARD, NULL, NULL);
+    real_fft_plan_left = fft_init((int)samples, FFT_REAL,(fft_direction_t) FFT_FORWARD, NULL, NULL);
+    real_fft_plan_right = fft_init((int)samples, FFT_REAL,(fft_direction_t) FFT_FORWARD, NULL, NULL);
 }
 
 void loop()

@@ -10,23 +10,20 @@ extern Adafruit_NeoPixel *strip;
 
 
 // ----------------------------------------------------------------------------
-// read 12 double values from bands and light 12 LEDs of strip
+// read 12 double values from bands[] and light 12 LEDs of strip
+// each bands[] value must be between 0.0 (OFF) and 1.0 (MAX intensity)
+// brightness can range from 0 (LED off) to 255 (max intensityx)
 // ----------------------------------------------------------------------------
-void showbands(Adafruit_NeoPixel * strip, double bands[], int num_bands){
+void showbands(Adafruit_NeoPixel * strip, double _bands[], int num_bands, double brightness){
 
-  //Serial.println("Computed bands:");
-  double max = 0;
-  //double avg = 0;
+  double bands[num_bands];
   
-  // evaluate bands  
-  for(int j=0; j<num_bands;j++){
-      if(bands[j] > max) max = bands[j];
-  }
   // set LEDs according to bands
   for(int j=0; j<num_bands;j++){
-    bands[j] = bands[j] / 4000;
-    if(bands[j]>255) bands[j] = 255;      
-    bands[j] = (bands[j]*bands[j])/(255.0);
+    bands[j] = _bands[j] * brightness;
+    if(bands[j]> 1.0) bands[j] = 1.0;      
+    else if(bands[j]< 0.0) bands[j] = 0.0;      
+    bands[j] = (bands[j]*bands[j]) * 255.0;
   }
   strip->setPixelColor(0, strip->Color(bands[0],0,0));                                     // RED
   strip->setPixelColor(1, strip->Color(bands[1]*3/4,bands[1]*1/4,                0)); //ORANGE        

@@ -23,6 +23,7 @@ String password;
 String stations[5];
 int volume = 10;
 int station = 0;
+uint8_t brightness = 20; // 0 ... 255
 
 // On and Off Hours and Minutes
 String hh_on = "00", mm_on="00", hh_off="00", mm_off="00";
@@ -209,8 +210,10 @@ void WiFi_loop(void){
     }else{
       if(audio_light_on)  
         Serial.println("Turn off radio and lights");
-      if(audio.isRunning())
+      if(audio.isRunning()){
         audio.pauseResume();
+        
+      }
       audio_light_on = false;  
     }
   }
@@ -260,6 +263,10 @@ void loadCredentials() {
   len += mm_off.length() + 1;
 
   String ok = EEPROM.readString(len); // load ok. ok means that stored data are valid
+  len += ok.length() + 1;
+
+  brightness = EEPROM.readShort(len);
+
   //printf("got ok=%s\r\n",ok.c_str());
   
   EEPROM.end();
@@ -319,7 +326,8 @@ void saveCredentials() {
   len += EEPROM.writeString(len, mm_on) + 1;
   len += EEPROM.writeString(len, hh_off) + 1;
   len += EEPROM.writeString(len, mm_off) + 1;
-  EEPROM.writeString(len,"OK"); 
+  len += EEPROM.writeString(len,"OK") + 1; 
+  EEPROM.writeByte(len, brightness);
   EEPROM.commit();
   EEPROM.end();
 }

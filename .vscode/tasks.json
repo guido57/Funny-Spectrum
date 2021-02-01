@@ -9,6 +9,14 @@
 			],
 			"group": "test",
 			"label": "PlatformIO: Test"
+		},
+		{
+			"type": "PlatformIO",
+			"task": "Remote Test",
+			"problemMatcher": [
+				"$platformio"
+			],
+			"label": "PlatformIO: Remote Test"
 		}
 	]
 }

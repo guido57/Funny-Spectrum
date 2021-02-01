@@ -36,7 +36,8 @@ void handleRoot() {
     Page += S("<input type='radio' ") + (station == i ? S(" checked = true ") : S("")) + S(" name='station' value='") + S(i) + S("'><input name='station") + S(i) +  S("' size=100 value='") + stations[i] + S("'><br>");
   }
 
-  Page += S("Volume: <input type='range' min='0' max='21'  style='width:400px' name='volume' value='") + S(volume) + S("' ><br>");
+  Page += S("Volume: <input type='range' min='0' max='21'  style='width:400px' name='volume' value='") + S(volume) + S("' onchange='document.getElementById(\"id_submit\").click();'>" + S(volume) + "/21<br>");
+  Page += S("Brightness: <input type='range' min='0' max='255'  style='width:400px' name='brightness' value='") + S(brightness) + S("' onchange='document.getElementById(\"id_submit\").click();' >" + S(brightness) + "/255<br>");
   
   Page += F("ON HH:MM <select name='hh_on' id='hh_on'>");
   for(int hh = 0; hh<24;hh++){
@@ -69,7 +70,7 @@ void handleRoot() {
           );
 
   Page += F(
-            "<br /><input type='submit' value='Save'/>"
+            "<br /><input id='id_submit' type='submit' value='Save'/>"
             "</form>"
             "<p>You may want to <a href='/wifi'>config the wifi connection</a>.</p>"
             "</body></html>");
@@ -188,6 +189,7 @@ void handleSettingsSave() {
   int last_station =  station;
   station = web_server.arg("station").toInt();
   volume = web_server.arg("volume").toInt();
+  brightness = web_server.arg("brightness").toInt(); // 0 ... 255
   
   hh_on = web_server.arg("hh_on");
   mm_on = web_server.arg("mm_on");

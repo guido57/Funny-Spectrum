@@ -24,7 +24,7 @@ class TaskWS2812Ring : public Task {
 };
 */
 
-void showbands(Adafruit_NeoPixel * strip, double bands[], int num_bands);
+void showbands(Adafruit_NeoPixel * strip, double bands[], int num_bands, double brightness);
 
 void WS2812Ring_loop();
 

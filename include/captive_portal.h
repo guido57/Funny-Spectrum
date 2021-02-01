@@ -33,6 +33,7 @@ extern String ssid;
 extern String password;
 extern String stations[5];
 extern int volume;
+extern uint8_t brightness;
 extern int station;
 extern String hh_on, mm_on, hh_off, mm_off; 
 
