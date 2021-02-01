@@ -48,8 +48,5 @@ c) "MP3/AAC decoding"
 d) LEDs updating 
 run concurrently on core 1, the FFT can run real time without any audio click.  
 
-## TODO 
-- Add a clock to turn off and on at specific time
-- Move FFT calculations on core 0 
 
 
