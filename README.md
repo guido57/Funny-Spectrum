@@ -28,9 +28,9 @@ For instructions to build your own Funny Spectrum device, see https://hackaday.i
 
 ## Web page at /wifi url to set/change the WIFI credentials accessing the builtin hotspot 
 If no Internet is available, the device becomes an access point, which you can connect to by smartphone or PC and access this page at http://192.168.4.1
-[![Watch](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Internet%20settings.PNG)](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Internet%20settings.PNG)
+[![Watch](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Internet%20settings%20by%20Access%20Point.png)](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Internet%20settings%20by%20Access%20Point.png)
 
-After getting an internet connection, going to the assigned IP address/wifi, e.g. http://192.168.1.242/wifi you see something like this:
+After getting a local IP address, going to it e.g. http://192.168.1.242/wifi you see something like this:
 [![Watch](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Internet%20settings.PNG)](https://github.com/guido57/Funny-Spectrum/blob/master/pictures/Internet%20settings.PNG)
 
 
