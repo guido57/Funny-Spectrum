@@ -11,7 +11,7 @@ String softAP_password  = APPSK;
 const char *myHostname = "esp32";
 
 // NTP settings
-const char* ntpServer = "pool.ntp.org";
+const char* ntpServer = "europe.pool.ntp.org";
 const long  gmtOffset_sec = 3600; // GMT + 1
 //Change the Daylight offset in milliseconds. If your country observes Daylight saving time set it to 3600. Otherwise, set it to 0.
 const int   daylightOffset_sec = 3600;
@@ -145,8 +145,12 @@ void WiFi_loop(void){
       _PP("IP address");
       Serial.println(WiFi.localIP());
 
+
+      //const char * defaultTimezone = "CET-1CEST,M3.5.0/2,M10.5.0/3";
+
       //init and get the time
-      configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+      //configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+      configTzTime( "GMT-1", ntpServer); //sets TZ and starts NTP sync
       printLocalTime();
 
       // Setup MDNS responder
