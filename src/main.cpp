@@ -5,6 +5,7 @@
 #include "mytask.h"
 #include <WS2812Ring.h>
 #include "myfft.h"
+#include <EspNow.h>
 
 // Digital I/O used for MAX98357
 //#define I2S_DOUT      27  // DIN connection
@@ -46,9 +47,9 @@ void playSampleCallback(int16_t sample[2]){
       Compute12bands(benchmark_mags_left, samples/2,bands);
       //Serial.printf("bands[0]=%f benchmark_mags_left[100]=%f\r\n",bands[0],benchmark_mags_left[100]);
       double scale = 16384.0 * 512.0 * 8.0;
-      showbands(strips[0],bands,num_bands,brightness/scale);
+      showbands(strips[0],bands,num_bands,espNow->settings.entries.brightness/scale);
       Compute12bands(benchmark_mags_right, samples/2,bands);
-      showbands(strips[1],bands,num_bands,brightness/scale);
+      showbands(strips[1],bands,num_bands,espNow->settings.entries.brightness/scale);
       //Serial.printf("FFT on 1024 samples and light LEDs took %lu msecs\r\n",millis()-start_millis);
     }
   }
@@ -136,14 +137,16 @@ void button_loop(){
       Serial.println("last_gpio32 == 10 and gpio32 == 0 -> cambia stazione");
       // find the next not empty url
       for(int i=0; i<5;i++){
-         station = (station+1)%5;
-         if(stations[station] != "")
+         espNow->settings.entries.station = (espNow->settings.entries.station+1)%5;
+         if( String(espNow->settings.entries.stations[espNow->settings.entries.station]) != "")
              break;
       }   
-      saveCredentials();
-      audio.connecttohost(stations[station].c_str());
+      //saveCredentials();
+      espNow->settings.Save();
+      audio.connecttohost(espNow->settings.entries.stations[espNow->settings.entries.station]);
     }
     last_gpio32 = gpio32;
+
   }
   
   if(audio_light_on == false) {
@@ -154,6 +157,9 @@ void button_loop(){
     strips[0]->show();
     strips[1]->show();
   }
+
+  espNow->Loop();
+
 }
 
 class  MyTaskButton:MyTask{
@@ -169,6 +175,9 @@ void setup() {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
     Serial.println();
+
+  // Initialize ESP-NOW. This load settings as well
+  espNow = new EspNow();
 
     audio.setPlaySampleCallback(playSampleCallback);
     audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);

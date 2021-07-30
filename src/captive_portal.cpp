@@ -1,5 +1,6 @@
 #include "captive_portal.h"
 #include <Audio.h>
+#include <EspNow.h>
 
 #include <TaskScheduler.h>
 Scheduler myScheduler;
@@ -17,16 +18,16 @@ const long  gmtOffset_sec = 3600; // GMT + 1
 const int   daylightOffset_sec = 3600;
 
 /* Don't set these wifi credentials. They are configurated at runtime and stored on EEPROM */
-String ssid;
-String password;
+//String ssid;
+//String password;
 
-String stations[5];
-int volume = 10;
-int station = 0;
-uint8_t brightness = 20; // 0 ... 255
+//String stations[5];
+//int volume = 10;
+//int station = 0;
+//uint8_t brightness = 20; // 0 ... 255
 
 // On and Off Hours and Minutes
-String hh_on = "00", mm_on="00", hh_off="00", mm_off="00";
+//String hh_on = "00", mm_on="00", hh_off="00", mm_off="00";
 bool audio_light_on = false;
 
 // DNS server
@@ -58,15 +59,15 @@ extern Audio audio;
 
 // =====================================================
 void connectWifi() {
-  if(ssid == ""){
+  if( String(espNow->settings.entries.ssid) == ""){
    Serial.println("SSID is empty!");
   }else{
     Serial.println("Connecting as wifi client...");
     //WiFi.forceSleepWake();
     WiFi.disconnect();
-    Serial.print("ssid=");Serial.println(ssid);
-    Serial.print("password=");Serial.println(password);
-    WiFi.begin(ssid.c_str(), password.c_str());
+    Serial.print("ssid=");Serial.println(espNow->settings.entries.ssid);
+    Serial.print("password=");Serial.println(espNow->settings.entries.pwd);
+    WiFi.begin(espNow->settings.entries.ssid, espNow->settings.entries.pwd);
     int connRes = WiFi.waitForConnectResult();
     Serial.print("connRes: ");
     Serial.println(connRes);
@@ -83,6 +84,9 @@ void printLocalTime()
   }
   Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
 }
+
+  tm timeinfo;
+  bool got_local_time = false;
 
 // =====================================================
 // Callback for the TaskWIFI  
@@ -141,7 +145,7 @@ void WiFi_loop(void){
     status = s;
     if (s == WL_CONNECTED){
       /* Just connected to WLAN */
-      Serial.printf("\r\nConnected to %s\r\n",ssid.c_str());
+      Serial.printf("\r\nConnected to %s\r\n",espNow->settings.entries.ssid);
       _PP("IP address");
       Serial.println(WiFi.localIP());
 
@@ -150,8 +154,16 @@ void WiFi_loop(void){
 
       //init and get the time
       //configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-      configTzTime( "GMT-1", ntpServer); //sets TZ and starts NTP sync
+      #define TZ "CET-1CEST,M3.5.0/2,M10.5.0/3"
+      configTzTime( TZ, ntpServer); //sets TZ and starts NTP sync
       printLocalTime();
+
+      if(!getLocalTime(&timeinfo, 5000U)){ // 500msecs timeout
+        Serial.println("Failed to obtain time");
+        got_local_time = false;
+     
+      }else
+        got_local_time = true;
 
       // Setup MDNS responder
       /*
@@ -167,8 +179,8 @@ void WiFi_loop(void){
       WiFi.mode(WIFI_MODE_STA);
 
       // start the radio
-      audio.connecttohost(stations[station].c_str());
-      audio.setVolume(volume);
+      audio.connecttohost(espNow->settings.entries.stations[espNow->settings.entries.station]);
+      audio.setVolume(espNow->settings.entries.volume);
     }
     else if (s == WL_NO_SSID_AVAIL){
       _PL("no SSID available -> turn on the Access Point");
@@ -192,13 +204,10 @@ void WiFi_loop(void){
   //HTTP
   web_server.handleClient();
 
-  tm timeinfo;
-  if(!getLocalTime(&timeinfo)){
-    Serial.println("Failed to obtain time");
-  }else{
+  if(got_local_time){
     // check if we ar ON or OFF
-    uint16_t mmm_on = hh_on.toInt() * 60 + mm_on.toInt();
-    uint16_t mmm_off = hh_off.toInt() * 60 + mm_off.toInt();
+    uint16_t mmm_on = atoi(espNow->settings.entries.hh_on) * 60 + atoi(espNow->settings.entries.mm_on);
+    uint16_t mmm_off = atoi(espNow->settings.entries.hh_off) * 60 + atoi(espNow->settings.entries.mm_off);
     int16_t now_t = timeinfo.tm_hour * 60 + timeinfo.tm_min;
     //Serial.printf("now_t=%d mmm_on=%d mmm_off=%d\r\n",now_t,mmm_on,mmm_off);
     if(     (mmm_on < mmm_off &&  now_t >= mmm_on && now_t < mmm_off) 
@@ -208,7 +217,7 @@ void WiFi_loop(void){
         Serial.println("Turn on radio and lights");
         if(!audio.isRunning())
           audio.pauseResume();
-        audio.connecttohost(stations[station].c_str());  
+        audio.connecttohost(espNow->settings.entries.stations[espNow->settings.entries.station]);  
         audio_light_on = true;  
       }      
     }else{
@@ -240,6 +249,7 @@ Task * myTaskWiFi;
 
 //===================================================
 /** Load WLAN credentials from EEPROM */
+/*
 void loadCredentials() {
   EEPROM.begin(2048);
   size_t len = 0;
@@ -302,8 +312,9 @@ void loadCredentials() {
   Serial.printf("hh_off = %s\r\n", hh_off.c_str());   
   Serial.printf("mm_off = %s\r\n", mm_off.c_str());   
 }
-
+*/
 /** Store WLAN credentials to EEPROM */
+/*
 void saveCredentials() {
 
   Serial.println("Saving settings ...");
@@ -335,7 +346,7 @@ void saveCredentials() {
   EEPROM.commit();
   EEPROM.end();
 }
-
+*/
 void AccessPointSetup(){
 
   softAP_ssid = "ESP32_" + WiFi.macAddress();
@@ -377,8 +388,9 @@ void CaptivePortalSetup(){
   web_server.onNotFound(handleNotFound);
   web_server.begin(); // Web server start
   Serial.println("HTTP server started");
-  loadCredentials(); // Load WLAN credentials from network
-  connect = ssid.length() > 0; // Request WLAN connect if there is a SSID
+  //loadCredentials(); // Load WLAN credentials from network
+  espNow->settings.Load();
+  connect = strlen(espNow->settings.entries.ssid) > 0; // Request WLAN connect if there is a SSID
 
   _PL("TaskScheduler WIFI Task");
   myTaskWiFi = new TaskWiFi(30,&myScheduler,WiFi_loop);
