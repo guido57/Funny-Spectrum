@@ -1,4 +1,4 @@
-#include <arduino.h>
+#include <Arduino.h>
 #include <myfft.h>
 
 #define twoPi 6.28318531

@@ -1,5 +1,5 @@
 /** Handle root or redirect to captive portal */
-#include <arduino.h>
+#include <Arduino.h>
 #include <handleHttp.h>
 #include <main.h>
 #include <tools.h>

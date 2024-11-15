@@ -60,7 +60,11 @@ extern Audio audio;
 void connectWifi() {
   if(ssid == ""){
    Serial.println("SSID is empty!");
-  }else{
+   ssid = "TIM-18373419";
+   password = "K9giYCTW4ryRS1MT26oIs7BG";
+  }
+  
+  {
     Serial.println("Connecting as wifi client...");
     //WiFi.forceSleepWake();
     WiFi.disconnect();
@@ -190,6 +194,7 @@ void WiFi_loop(void){
   //DNS
   dnsServer.processNextRequest();
   //HTTP
+  //web_server.Loop();
   web_server.handleClient();
 
   tm timeinfo;

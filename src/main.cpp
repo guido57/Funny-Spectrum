@@ -24,6 +24,9 @@ Adafruit_NeoPixel * strips[2];
 
 extern bool audio_light_on; // if Audio is paused it goes false
 
+
+
+
 // -------------------------------------------------------------------------------------------------
 // receive a stereo sample and use it to light the LEDs
 // store 1024 stereo samples, calculate FFT, compute 12 audio bands and show on WS2812 12 LEDs rings  
@@ -46,9 +49,9 @@ void playSampleCallback(int16_t sample[2]){
       Compute12bands(benchmark_mags_left, samples/2,bands);
       //Serial.printf("bands[0]=%f benchmark_mags_left[100]=%f\r\n",bands[0],benchmark_mags_left[100]);
       double scale = 16384.0 * 512.0 * 8.0;
-      showbands(strips[0],bands,num_bands,brightness/scale);
+      //GG showbands(strips[0],bands,num_bands,brightness/scale);
       Compute12bands(benchmark_mags_right, samples/2,bands);
-      showbands(strips[1],bands,num_bands,brightness/scale);
+      //GG showbands(strips[1],bands,num_bands,brightness/scale);
       //Serial.printf("FFT on 1024 samples and light LEDs took %lu msecs\r\n",millis()-start_millis);
     }
   }
@@ -151,8 +154,8 @@ void button_loop(){
       strips[0]->setPixelColor(i, strips[0]->Color(0,0,0)); 
       strips[1]->setPixelColor(i, strips[1]->Color(0,0,0)); 
     }
-    strips[0]->show();
-    strips[1]->show();
+    //GG strips[0]->show();
+    //GG strips[1]->show();
   }
 }
 
@@ -181,8 +184,8 @@ void setup() {
     strips[1]->begin();
     strips[0]->setBrightness(255);
     strips[1]->setBrightness(255);
-    strips[0]->show(); // Initialize all pixels to 'off'
-    strips[1]->show(); // Initialize all pixels to 'off'
+    //GG strips[0]->show(); // Initialize all pixels to 'off'
+    //GG strips[1]->show(); // Initialize all pixels to 'off'
 
     CaptivePortalSetup(); 
     _PL("TaskScheduler Audio Task");

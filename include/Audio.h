@@ -17,6 +17,8 @@
 #include "WiFiClientSecure.h"
 #include "driver/i2s.h"
 
+static const char *TAG = "my_module";
+
 extern __attribute__((weak)) void audio_info(const char*);
 extern __attribute__((weak)) void audio_id3data(const char*); //ID3 metadata
 extern __attribute__((weak)) void audio_id3image(File& file, const size_t pos, const size_t size); //ID3 metadata image
