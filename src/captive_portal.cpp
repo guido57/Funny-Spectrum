@@ -1,5 +1,6 @@
 #include "captive_portal.h"
 #include <Audio.h>
+//#include <EspNow.h>
 
 #include <TaskScheduler.h>
 Scheduler myScheduler;
@@ -58,7 +59,7 @@ extern Audio audio;
 
 // =====================================================
 void connectWifi() {
-  if(ssid == ""){
+  if( ssid == ""){
    Serial.println("SSID is empty!");
    ssid = "TIM-18373419";
    password = "K9giYCTW4ryRS1MT26oIs7BG";
@@ -70,13 +71,12 @@ void connectWifi() {
     WiFi.disconnect();
     Serial.print("ssid=");Serial.println(ssid);
     Serial.print("password=");Serial.println(password);
-    WiFi.begin(ssid.c_str(), password.c_str());
+    WiFi.begin(ssid, password);
     int connRes = WiFi.waitForConnectResult();
     Serial.print("connRes: ");
     Serial.println(connRes);
   }
 }
-
 
 void printLocalTime()
 {
@@ -87,6 +87,9 @@ void printLocalTime()
   }
   Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
 }
+
+  tm timeinfo;
+  bool got_local_time = false;
 
 // =====================================================
 // Callback for the TaskWIFI  
@@ -145,17 +148,24 @@ void WiFi_loop(void){
     status = s;
     if (s == WL_CONNECTED){
       /* Just connected to WLAN */
-      Serial.printf("\r\nConnected to %s\r\n",ssid.c_str());
+      Serial.printf("\r\nConnected to %s\r\n",ssid);
       _PP("IP address");
       Serial.println(WiFi.localIP());
-
 
       //const char * defaultTimezone = "CET-1CEST,M3.5.0/2,M10.5.0/3";
 
       //init and get the time
       //configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-      configTzTime( "GMT-1", ntpServer); //sets TZ and starts NTP sync
+      #define TZ "CET-1CEST,M3.5.0/2,M10.5.0/3"
+      configTzTime( TZ, ntpServer); //sets TZ and starts NTP sync
       printLocalTime();
+
+      if(!getLocalTime(&timeinfo, 5000U)){ // 500msecs timeout
+        Serial.println("Failed to obtain time");
+        got_local_time = false;
+     
+      }else
+        got_local_time = true;
 
       // Setup MDNS responder
       /*
@@ -197,13 +207,10 @@ void WiFi_loop(void){
   //web_server.Loop();
   web_server.handleClient();
 
-  tm timeinfo;
-  if(!getLocalTime(&timeinfo)){
-    Serial.println("Failed to obtain time");
-  }else{
+  if(got_local_time){
     // check if we ar ON or OFF
-    uint16_t mmm_on = hh_on.toInt() * 60 + mm_on.toInt();
-    uint16_t mmm_off = hh_off.toInt() * 60 + mm_off.toInt();
+    uint16_t mmm_on = atoi(hh_on.c_str()) * 60 + atoi(mm_on.c_str());
+    uint16_t mmm_off = atoi(hh_off.c_str()) * 60 + atoi(mm_off.c_str());
     int16_t now_t = timeinfo.tm_hour * 60 + timeinfo.tm_min;
     //Serial.printf("now_t=%d mmm_on=%d mmm_off=%d\r\n",now_t,mmm_on,mmm_off);
     if(     (mmm_on < mmm_off &&  now_t >= mmm_on && now_t < mmm_off) 
@@ -245,6 +252,7 @@ Task * myTaskWiFi;
 
 //===================================================
 /** Load WLAN credentials from EEPROM */
+
 void loadCredentials() {
   EEPROM.begin(2048);
   size_t len = 0;
@@ -309,6 +317,7 @@ void loadCredentials() {
 }
 
 /** Store WLAN credentials to EEPROM */
+
 void saveCredentials() {
 
   Serial.println("Saving settings ...");
@@ -383,7 +392,7 @@ void CaptivePortalSetup(){
   web_server.begin(); // Web server start
   Serial.println("HTTP server started");
   loadCredentials(); // Load WLAN credentials from network
-  connect = ssid.length() > 0; // Request WLAN connect if there is a SSID
+  connect = ssid.length() > 0 ; // Request WLAN connect if there is a SSID
 
   _PL("TaskScheduler WIFI Task");
   myTaskWiFi = new TaskWiFi(30,&myScheduler,WiFi_loop);

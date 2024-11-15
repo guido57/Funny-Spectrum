@@ -5,6 +5,7 @@
 #include "mytask.h"
 #include <WS2812Ring.h>
 #include "myfft.h"
+//#include <EspNow.h>
 
 // Digital I/O used for MAX98357
 //#define I2S_DOUT      27  // DIN connection
@@ -140,13 +141,15 @@ void button_loop(){
       // find the next not empty url
       for(int i=0; i<5;i++){
          station = (station+1)%5;
-         if(stations[station] != "")
+         if( stations[station] != "")
              break;
       }   
       saveCredentials();
+      //espNow->settings.Save();
       audio.connecttohost(stations[station].c_str());
     }
     last_gpio32 = gpio32;
+
   }
   
   if(audio_light_on == false) {
@@ -157,6 +160,9 @@ void button_loop(){
     //GG strips[0]->show();
     //GG strips[1]->show();
   }
+
+  //espNow->Loop();
+
 }
 
 class  MyTaskButton:MyTask{
@@ -172,6 +178,9 @@ void setup() {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
     Serial.println();
+
+  // Initialize ESP-NOW. This load settings as well
+  //espNow = new EspNow();
 
     audio.setPlaySampleCallback(playSampleCallback);
     audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);

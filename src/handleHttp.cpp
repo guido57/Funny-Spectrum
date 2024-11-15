@@ -4,9 +4,10 @@
 #include <main.h>
 #include <tools.h>
 #include <Audio.h>
+//#include <EspNow.h>
 
 extern Audio audio;
-extern int station;
+//extern int station;
 #define S String
 // ==================================================================================================
 void handleRoot() {
@@ -27,43 +28,47 @@ void handleRoot() {
   if (web_server.client().localIP() == apIP) {
     Page += S("<p>You are connected through the soft AP: ") + softAP_ssid + S("</p>");
   } else {
-    Page += S("<p>You are connected through the wifi network: ") + ssid + S("</p>");
+    Page += S("<p>You are connected through the wifi network: ") + String(ssid) + S("</p>");
   }
   Page += S(
             "<form method='POST' action='settingssave'>"
           );
   for(int i = 0; i <5; i++){
-    Page += S("<input type='radio' ") + (station == i ? S(" checked = true ") : S("")) + S(" name='station' value='") + S(i) + S("'><input name='station") + S(i) +  S("' size=100 value='") + stations[i] + S("'><br>");
+    Page += S("<input type='radio' ") + ((station == i) ? S(" checked = true ") : S("")) + S(" name='station' value='") + S(i) + S("'><input name='station") + S(i) +  S("' size=100 value='") 
+        + String(stations[i]) + S("'><br>");
   }
 
-  Page += S("Volume: <input type='range' min='0' max='21'  style='width:400px' name='volume' value='") + S(volume) + S("' onchange='document.getElementById(\"id_submit\").click();'>" + S(volume) + "/21<br>");
-  Page += S("Brightness: <input type='range' min='0' max='255'  style='width:400px' name='brightness' value='") + S(brightness) + S("' onchange='document.getElementById(\"id_submit\").click();' >" + S(brightness) + "/255<br>");
+  Page += S("Volume: <input type='range' min='0' max='21'  style='width:400px' name='volume' value='") + S(volume) + S("' onchange='document.getElementById(\"id_submit\").click();'>" 
+      + S(volume) + "/21<br>");
+  Page += S("Brightness: <input type='range' min='0' max='255'  style='width:400px' name='brightness' value='") 
+      + S(brightness) + S("' onchange='document.getElementById(\"id_submit\").click();' >" 
+        + S(brightness) + "/255<br>");
   
   Page += F("ON HH:MM <select name='hh_on' id='hh_on'>");
   for(int hh = 0; hh<24;hh++){
     String hhs = (hh < 10 ? "0" : "") + String(hh);
-    Page += S("<option value='" + hhs + "' " + (hhs == hh_on ? "selected" : "") +  + ">" + hhs + "</option>");
+    Page += S("<option value='" + hhs + "' " + (hhs == String(hh_on) ? "selected" : "") +  + ">" + hhs + "</option>");
   }
   Page += F("</select>"
             " : <select name='mm_on' id='mm_on'>"
           );
   for(int mm = 0; mm<60;mm+=15){
     String mms = (mm < 15 ? "0" : "") + String(mm);
-    Page += S("<option value='" + mms + "' " + (mms == mm_on ? "selected" : "") +  + ">" + mms + "</option>");
+    Page += S("<option value='" + mms + "' " + (mms == String(mm_on) ? "selected" : "") +  + ">" + mms + "</option>");
   }
   Page += F("</select><br>");
           
   Page += F("OFF HH:MM <select name='hh_off' id='hh_off'>");
   for(int hh = 0; hh<24;hh++){
     String hhs = (hh < 10 ? "0" : "") + String(hh);
-    Page += S("<option value='" + hhs + "' " + (hhs == hh_off ? "selected" : "") +  + ">" + hhs + "</option>");
+    Page += S("<option value='" + hhs + "' " + (hhs == String(hh_off) ? "selected" : "") +  + ">" + hhs + "</option>");
   }
   Page += F("</select>"
             " : <select name='mm_off' id='mm_off'>"
           );
   for(int mm = 0; mm<60;mm+=15){
     String mms = (mm < 15 ? "0" : "") + String(mm);
-    Page += S("<option value='" + mms + "' " + (mms == mm_off ? "selected" : "") +  + ">" + mms + "</option>");
+    Page += S("<option value='" + mms + "' " + (mms == String(mm_off) ? "selected" : "") +  + ">" + mms + "</option>");
   }
   Page += F("</select>"
             " "
@@ -111,7 +116,7 @@ void handleWifi() {
   if (web_server.client().localIP() == apIP) {
     Page += String(F("<p>You are connected through the soft AP: ")) + softAP_ssid + F("</p>");
   } else {
-    Page += String(F("<p>You are connected through the wifi network: ")) + ssid + F("</p>");
+    Page += String(F("<p>You are connected through the wifi network: ")) + S(ssid) + F("</p>");
   }
   
   Page +=
@@ -172,6 +177,7 @@ void handleWifiSave() {
   web_server.sendHeader("Expires", "-1");
   web_server.send(302, "text/plain", "");    // Empty content inhibits Content-length header so we have to close the socket ourselves.
   web_server.client().stop(); // Stop is needed because we sent no content length
+  //saveCredentials();
   saveCredentials();
   connect = ssid.length() > 0; // Request WLAN connect with new credentials if there is a SSID
 }
@@ -190,19 +196,19 @@ void handleSettingsSave() {
   station = web_server.arg("station").toInt();
   volume = web_server.arg("volume").toInt();
   brightness = web_server.arg("brightness").toInt(); // 0 ... 255
-  
+
   hh_on = web_server.arg("hh_on");
   mm_on = web_server.arg("mm_on");
   hh_off = web_server.arg("hh_off");
   mm_off = web_server.arg("mm_off");
 
   for(int i=0;i<5;i++){
-    Serial.printf("Station[%d]=%s\r\n",i,stations[i].c_str());
+    Serial.printf("Station[%d]=%s\r\n",i,stations[i]);
   }
-  Serial.printf("station=%d\r\n",station);  
-  Serial.printf("volume=%d\r\n",volume);  
-  Serial.printf("ON=%s:%s\r\n",hh_on.c_str(),mm_on.c_str());  
-  Serial.printf("OFF=%s:%s\r\n",hh_off.c_str(),mm_off.c_str());  
+  Serial.printf("station=%d\r\n", station);  
+  Serial.printf("volume=%d\r\n", volume);  
+  Serial.printf("ON=%s:%s\r\n",hh_on,mm_on);  
+  Serial.printf("OFF=%s:%s\r\n",hh_off,mm_off);  
 
   web_server.sendHeader("Location", "/", true);
   web_server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
